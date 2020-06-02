@@ -1,0 +1,21 @@
+
+###
+GET http://localhost:8088/todos
+
+###
+
+POST http://localhost:8088/todos
+Content-Type: application/json
+
+{
+    "title": "Learn actix.rs" 
+}
+
+###
+PUT http://localhost:8088/todos/123432
+Content-Type: application/json
+
+{
+    "title": "Updated title",
+    "completed": true
+}
