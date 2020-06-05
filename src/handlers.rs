@@ -1,4 +1,5 @@
 use crate::models::{TodoItem, TodoItemEdit, TodoItemNew};
+use actix_web::http::StatusCode;
 use actix_web::{get, post, put, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 
@@ -19,8 +20,8 @@ pub async fn index() -> impl Responder {
     HttpResponse::Ok().json(items)
 }
 
-async fn create_todo(info: web::Json<TodoItemNew>) -> impl Responder {
-    HttpResponse::Ok().json(TodoItem {
+pub async fn create_todo(info: web::Json<TodoItemNew>) -> impl Responder {
+    HttpResponse::build(StatusCode::from_u16(201).unwrap()).json(TodoItem {
         uuid: "123".to_string(),
         title: info.title.to_string(),
         completed: false,

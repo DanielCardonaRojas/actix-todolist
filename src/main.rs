@@ -1,14 +1,15 @@
-use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 mod handlers;
 mod middlewares;
 mod models;
 
+use dotenv::dotenv;
 use handlers::*;
 use middlewares::Logging;
 use models::AppState;
 use slog::{info, o, Drain};
 use slog_term;
+use std::env;
 
 fn configure_log() -> slog::Logger {
     let decorator = slog_term::TermDecorator::new().build();
@@ -19,8 +20,13 @@ fn configure_log() -> slog::Logger {
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
+    dotenv().expect(".env file not found");
     let log = configure_log();
-    info!(log, "Starting server at: http://localhost:8088");
+    let host = env::var("HOST").unwrap();
+    let port = env::var("PORT").unwrap();
+    let base_url = format!("{}:{}", host, port);
+
+    info!(log, "Starting server at: http://{}", base_url);
     HttpServer::new(move || {
         App::new()
             .data(AppState {
@@ -29,7 +35,55 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logging::new(log.clone()))
             .service(web::scope("/todos").configure(todo_service))
     })
-    .bind("127.0.0.1:8088")?
+    .bind(base_url)?
     .run()
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{test, web, App};
+    use handlers;
+    use lazy_static::lazy_static;
+    use serde_json::json;
+
+    lazy_static! {
+        static ref APP_STATE: AppState = {
+            AppState {
+                logger: configure_log(),
+            }
+        };
+    }
+
+    #[test]
+    fn test_str_len() {
+        assert_eq!(2 + 2, 4);
+    }
+
+    #[actix_rt::test]
+    async fn test_create_todos() {
+        let mut app = test::init_service(
+            App::new()
+                .data(AppState {
+                    logger: configure_log(),
+                })
+                .service(web::scope("/todos").configure(todo_service)),
+        )
+        .await;
+
+        let todo_title = "Create todo List";
+
+        let create_todo_list = json!({ "title": todo_title });
+
+        let req = test::TestRequest::post()
+            .uri("/todos")
+            .header("Content-Type", "application/json")
+            .set_payload(create_todo_list.to_string())
+            .to_request();
+
+        let response = test::call_service(&mut app, req).await;
+
+        assert_eq!(response.status(), 201, "Status should be 200.");
+    }
 }

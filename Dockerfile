@@ -9,5 +9,7 @@ RUN cargo install --path .
 FROM gcr.io/distroless/cc-debian10
 
 COPY --from=build /usr/local/cargo/bin/actix-todolist .
+COPY --from=builder /target/x86_64-unknown-linux-musl/release/rust-actix-web .
+COPY .env .
 
-# CMD ["actix-todolist"]
+CMD ["./actix-todolist"]
