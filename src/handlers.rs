@@ -11,7 +11,7 @@ pub async fn index() -> impl Responder {
             completed: false,
         },
         TodoItem {
-            uuid: "918".to_string(),
+            uuid: "919".to_string(),
             title: "task2".to_string(),
             completed: true,
         },

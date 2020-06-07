@@ -5,6 +5,7 @@ mod models;
 
 use dotenv::dotenv;
 use handlers::*;
+use listenfd::ListenFd;
 use middlewares::Logging;
 use models::AppState;
 use slog::{info, o, Drain};
@@ -25,19 +26,25 @@ async fn main() -> std::io::Result<()> {
     let host = env::var("HOST").unwrap();
     let port = env::var("PORT").unwrap();
     let base_url = format!("{}:{}", host, port);
+    let mut listenfd = ListenFd::from_env();
 
     info!(log, "Starting server at: http://{}", base_url);
-    HttpServer::new(move || {
+    let mut server = HttpServer::new(move || {
         App::new()
             .data(AppState {
                 logger: log.clone(),
             })
             .wrap(Logging::new(log.clone()))
             .service(web::scope("/todos").configure(todo_service))
-    })
-    .bind(base_url)?
-    .run()
-    .await
+    });
+
+    server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {
+        server.listen(l)?
+    } else {
+        server.bind(base_url)?
+    };
+
+    server.run().await
 }
 
 #[cfg(test)]
