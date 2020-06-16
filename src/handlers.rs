@@ -1,48 +1,61 @@
-use crate::models::{TodoItem, TodoItemEdit, TodoItemNew};
+use crate::app_state::AppState;
+use crate::models::{TodoItem, TodoItemEdit, TodoItemNew, TodoItemReplacement};
+use crate::task_repository::*;
 use actix_web::http::StatusCode;
 use actix_web::{get, post, put, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-pub async fn index() -> impl Responder {
-    let items = [
-        TodoItem {
-            uuid: "123".to_string(),
-            title: "task1".to_string(),
-            completed: false,
-        },
-        TodoItem {
-            uuid: "919".to_string(),
-            title: "task2".to_string(),
-            completed: true,
-        },
-    ];
+pub async fn index(data: web::Data<AppState>) -> impl Responder {
+    let conn = data.pool.get().unwrap();
+    let taskService = TaskRepository::new(&conn);
+    let result = taskService.list();
 
-    HttpResponse::Ok().json(items)
+    HttpResponse::Ok().json(result.unwrap())
 }
 
-pub async fn create_todo(info: web::Json<TodoItemNew>) -> impl Responder {
-    HttpResponse::build(StatusCode::from_u16(201).unwrap()).json(TodoItem {
-        uuid: "123".to_string(),
-        title: info.title.to_string(),
-        completed: false,
-    })
+pub async fn create_todo(
+    info: web::Json<TodoItemNew>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let conn = data.pool.get().unwrap();
+    let taskService = TaskRepository::new(&conn);
+    let payload: TodoItemNew = info.into_inner();
+    let result = taskService.create(payload);
+
+    HttpResponse::build(StatusCode::from_u16(201).unwrap()).json(result.unwrap())
 }
 
-async fn update_todo(info: web::Json<TodoItemEdit>, id: web::Path<String>) -> impl Responder {
-    let mut item = TodoItem {
-        uuid: id.to_string(),
-        title: "some task".to_string(),
-        completed: false,
-    };
+async fn update_todo(
+    data: web::Data<AppState>,
+    info: web::Json<TodoItemReplacement>,
+    id: web::Path<Uuid>,
+) -> impl Responder {
+    let conn = data.pool.get().unwrap();
+    let taskService = TaskRepository::new(&conn);
+    let result = taskService.update(id.to_string(), info.into_inner());
 
-    item.completed = info.completed.unwrap_or(item.completed);
-    item.title = info
-        .title
-        .as_ref()
-        .map(move |t| t.to_string())
-        .unwrap_or(item.title);
+    HttpResponse::Ok().json(result.unwrap())
+}
 
-    HttpResponse::Ok().json(item)
+async fn edit_todo(
+    data: web::Data<AppState>,
+    info: web::Json<TodoItemEdit>,
+    id: web::Path<Uuid>,
+) -> impl Responder {
+    let conn = data.pool.get().unwrap();
+    let taskService = TaskRepository::new(&conn);
+    let result = taskService.edit(id.to_string(), info.into_inner());
+
+    HttpResponse::Ok().json(result.unwrap())
+}
+
+async fn delete_todo(data: web::Data<AppState>, id: web::Path<Uuid>) -> impl Responder {
+    let conn = data.pool.get().unwrap();
+    let taskService = TaskRepository::new(&conn);
+    let result = taskService.delete(id.to_string());
+
+    HttpResponse::Ok().json(result.unwrap())
 }
 
 pub fn todo_service(cfg: &mut web::ServiceConfig) {
@@ -53,5 +66,10 @@ pub fn todo_service(cfg: &mut web::ServiceConfig) {
             .route(web::head().to(|| HttpResponse::MethodNotAllowed())),
     );
 
-    cfg.service(web::resource("/{item_id}").route(web::put().to(update_todo)));
+    cfg.service(
+        web::resource("/{item_id}")
+            .route(web::put().to(update_todo))
+            .route(web::patch().to(edit_todo))
+            .route(web::delete().to(delete_todo)),
+    );
 }

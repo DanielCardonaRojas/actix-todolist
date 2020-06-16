@@ -8,14 +8,25 @@ POST http://localhost:8088/todos
 Content-Type: application/json
 
 {
-    "title": "Learn actix.rs" 
+    "title": "Learn diesel.rs" 
 }
 
 ###
-PUT http://localhost:8088/todos/123432
+PUT http://localhost:8088/todos/0dfa32da-a07f-4961-a8cd-09742061d5de
 Content-Type: application/json
 
 {
-    "title": "Updated title",
+    "title": "Updated sisas",
     "completed": true
 }
+
+###
+PATCH http://localhost:8088/todos/716e6003-72dc-4790-9d9e-496c90f26295
+Content-Type: application/json
+
+{
+    "completed": true
+}
+
+### 
+DELETE http://localhost:8088/todos/0dfa32da-a07f-4961-a8cd-09742061d5de

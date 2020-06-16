@@ -1,13 +1,23 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+mod app_state;
+mod db_connection;
 mod handlers;
 mod middlewares;
 mod models;
+mod task_repository;
 
+pub mod schema;
 use dotenv::dotenv;
+#[macro_use]
+extern crate diesel;
+
+use app_state::AppState;
+use db_connection::init_pool;
+use diesel::pg::PgConnection;
+use diesel::r2d2::{ConnectionManager, Pool, PoolError, PooledConnection};
 use handlers::*;
 use listenfd::ListenFd;
 use middlewares::Logging;
-use models::AppState;
 use slog::{info, o, Drain};
 use slog_term;
 use std::env;
@@ -28,11 +38,15 @@ async fn main() -> std::io::Result<()> {
     let base_url = format!("{}:{}", host, port);
     let mut listenfd = ListenFd::from_env();
 
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = init_pool(&database_url).expect("Failed to create pool");
+
     info!(log, "Starting server at: http://{}", base_url);
     let mut server = HttpServer::new(move || {
         App::new()
             .data(AppState {
                 logger: log.clone(),
+                pool: pool.clone(),
             })
             .wrap(Logging::new(log.clone()))
             .service(web::scope("/todos").configure(todo_service))
@@ -55,14 +69,6 @@ mod tests {
     use lazy_static::lazy_static;
     use serde_json::json;
 
-    lazy_static! {
-        static ref APP_STATE: AppState = {
-            AppState {
-                logger: configure_log(),
-            }
-        };
-    }
-
     #[test]
     fn test_str_len() {
         assert_eq!(2 + 2, 4);
@@ -70,10 +76,12 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_create_todos() {
+        let pool = init_pool("").expect("Failed to create pool");
         let mut app = test::init_service(
             App::new()
                 .data(AppState {
                     logger: configure_log(),
+                    pool: pool.clone(),
                 })
                 .service(web::scope("/todos").configure(todo_service)),
         )
