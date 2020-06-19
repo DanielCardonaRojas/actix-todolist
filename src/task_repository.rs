@@ -34,6 +34,12 @@ impl<'a> TaskRepository<'a> {
             .get_result(self.connection)
     }
 
+    pub fn findById(&self, key: String) -> QueryResult<TodoItem> {
+        tasks::table
+            .find(key)
+            .get_result::<TodoItem>(self.connection)
+    }
+
     pub fn list(&self) -> QueryResult<Vec<TodoItem>> {
         let all = tasks::table.load::<TodoItem>(self.connection)?;
         Result::Ok(all)

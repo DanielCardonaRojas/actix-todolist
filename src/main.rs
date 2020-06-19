@@ -5,11 +5,15 @@ mod handlers;
 mod middlewares;
 mod models;
 mod task_repository;
+mod user_handlers;
+mod user_service;
 
 pub mod schema;
 use dotenv::dotenv;
 #[macro_use]
 extern crate diesel;
+extern crate bcrypt;
+extern crate chrono;
 
 use app_state::AppState;
 use db_connection::init_pool;
@@ -18,9 +22,11 @@ use diesel::r2d2::{ConnectionManager, Pool, PoolError, PooledConnection};
 use handlers::*;
 use listenfd::ListenFd;
 use middlewares::Logging;
+use serde_json;
 use slog::{info, o, Drain};
 use slog_term;
 use std::env;
+use user_handlers::*;
 
 fn configure_log() -> slog::Logger {
     let decorator = slog_term::TermDecorator::new().build();
@@ -50,6 +56,7 @@ async fn main() -> std::io::Result<()> {
             })
             .wrap(Logging::new(log.clone()))
             .service(web::scope("/todos").configure(todo_service))
+            .service(web::scope("").configure(user_service))
     });
 
     server = if let Some(l) = listenfd.take_tcp_listener(0).unwrap() {

@@ -1,0 +1,6 @@
+CREATE TABLE users (
+	id VARCHAR NOT NULL PRIMARY KEY,
+  email VARCHAR(100) NOT NULL,
+  password VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP NOT NULL
+);

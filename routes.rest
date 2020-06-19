@@ -30,3 +30,23 @@ Content-Type: application/json
 
 ### 
 DELETE http://localhost:8088/todos/0dfa32da-a07f-4961-a8cd-09742061d5de
+
+### Register User
+
+POST http://localhost:8088/register
+Content-Type: application/json
+
+{
+    "email": "d.cardona.rojas@gmail.com",
+    "password": "123423345"
+}
+
+### Login User
+
+POST http://localhost:8088/auth
+Content-Type: application/json
+
+{
+    "email": "d.cardona.rojas@gmail.com",
+    "password": "123423345"
+}
