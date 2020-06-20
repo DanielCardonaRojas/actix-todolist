@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
-use crate::models::{AuthUser, RegisterUser, UserClaims};
-use crate::user_service::*;
+use crate::models::user::{AuthUser, RegisterUser, UserClaims};
+use crate::services::UserService;
 use actix_web::http::StatusCode;
 use actix_web::{get, post, put, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};

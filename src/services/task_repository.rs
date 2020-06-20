@@ -1,6 +1,6 @@
 use crate::db_connection::{PgPool, PgPooledConnection};
 use crate::diesel::RunQueryDsl;
-use crate::models::{TodoItem, TodoItemEdit, TodoItemNew, TodoItemReplacement};
+use crate::models::task::{TodoItem, TodoItemEdit, TodoItemNew, TodoItemReplacement};
 use crate::schema::tasks;
 use crate::schema::tasks::dsl::*;
 use diesel::prelude::*;

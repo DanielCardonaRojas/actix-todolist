@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
-use crate::models::{TodoItem, TodoItemEdit, TodoItemNew, TodoItemReplacement};
-use crate::task_repository::*;
+use crate::models::task::{TodoItem, TodoItemEdit, TodoItemNew, TodoItemReplacement};
+use crate::services::TaskRepository;
 use actix_web::http::StatusCode;
 use actix_web::{get, post, put, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};

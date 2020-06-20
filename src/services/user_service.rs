@@ -1,6 +1,6 @@
 use crate::db_connection::{PgPool, PgPooledConnection};
 use crate::diesel::RunQueryDsl;
-use crate::models::{AuthUser, RegisterUser, User, UserClaims};
+use crate::models::user::{AuthUser, RegisterUser, User, UserClaims};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use diesel::prelude::*;

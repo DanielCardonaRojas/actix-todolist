@@ -1,4 +1,4 @@
-use crate::db_connection::{init_pool, PgPool};
+use crate::db_connection::PgPool;
 use slog::Logger;
 
 pub struct AppState {
