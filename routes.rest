@@ -6,6 +6,7 @@ GET http://localhost:8088/todos
 
 POST http://localhost:8088/todos
 Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImQuY2FyZG9uYS5yb2phc0BnbWFpbC5jb20iLCJpZCI6IjExYWJkZDkxLWIxNTMtNDc1MC1iMjY3LTYzZWM4YmRjOTk0MyIsImV4cCI6MTU5MzI2MjY4M30.uJFBW471Mipf1DoaQpfLW81aynWUGCJqk8CPG9i01N8
 
 {
     "title": "Learn diesel.rs" 

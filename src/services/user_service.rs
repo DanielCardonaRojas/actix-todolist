@@ -38,4 +38,13 @@ impl<'a> UserService<'a> {
         );
         token
     }
+
+    pub fn decode_token(token: &str) -> Result<UserClaims, jsonwebtoken::errors::Error> {
+        decode::<UserClaims>(
+            token,
+            &DecodingKey::from_secret("secret".as_ref()),
+            &Validation::default(),
+        )
+        .map(|jwt| jwt.claims)
+    }
 }

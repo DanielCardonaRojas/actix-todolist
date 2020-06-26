@@ -1,5 +1,7 @@
 use crate::schema::users;
 use chrono::prelude::*;
+use chrono::{Duration, Local};
+use futures::future;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -43,10 +45,11 @@ pub struct AuthUser {
     pub password: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct UserClaims {
     pub email: String,
     pub id: String,
+    pub exp: usize,
 }
 
 impl From<User> for UserClaims {
@@ -54,6 +57,7 @@ impl From<User> for UserClaims {
         UserClaims {
             email: user.email,
             id: user.id,
+            exp: (Local::now() + Duration::hours(24)).timestamp() as usize,
         }
     }
 }
