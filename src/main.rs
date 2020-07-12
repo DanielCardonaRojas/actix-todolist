@@ -1,6 +1,7 @@
 use actix_web::{web, App, HttpServer};
 mod app_state;
 mod db_connection;
+mod graphql;
 mod handlers;
 mod middlewares;
 mod models;
@@ -12,6 +13,7 @@ use dotenv::dotenv;
 extern crate diesel;
 extern crate bcrypt;
 extern crate chrono;
+extern crate juniper;
 
 use app_state::AppState;
 use db_connection::init_pool;
@@ -50,6 +52,7 @@ async fn main() -> std::io::Result<()> {
             })
             .wrap(Logging::new(log.clone()))
             .service(web::scope("/todos").configure(todo_service))
+            .service(web::scope("/graphql").configure(graphql::graphql_service))
             .service(web::scope("").configure(user_service))
     });
 
