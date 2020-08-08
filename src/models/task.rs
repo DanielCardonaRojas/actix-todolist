@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[table_name = "tasks"]
-#[derive(Serialize, Deserialize, Queryable, Insertable)]
+#[derive(juniper::GraphQLObject, Serialize, Deserialize, Queryable, Insertable)]
 pub struct TodoItem {
     pub id: String,
     pub title: String,
@@ -27,20 +27,20 @@ impl From<TodoItemNew> for TodoItem {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(juniper::GraphQLInputObject, Serialize, Deserialize)]
 pub struct TodoItemNew {
     pub title: String,
 }
 
 #[table_name = "tasks"]
-#[derive(Deserialize, AsChangeset)]
+#[derive(juniper::GraphQLInputObject, Deserialize, AsChangeset)]
 pub struct TodoItemEdit {
     pub title: Option<String>,
     pub completed: Option<bool>,
 }
 
 #[table_name = "tasks"]
-#[derive(Deserialize, AsChangeset)]
+#[derive(juniper::GraphQLInputObject, Deserialize, AsChangeset)]
 pub struct TodoItemReplacement {
     pub title: String,
     pub completed: bool,

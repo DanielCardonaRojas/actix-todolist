@@ -6,6 +6,7 @@ use crate::schema::tasks::dsl::*;
 use diesel::prelude::*;
 use diesel::result::{Error, QueryResult};
 
+#[derive(Clone)]
 pub struct TaskRepository<'a> {
     connection: &'a PgPooledConnection,
 }
