@@ -33,14 +33,14 @@ pub struct TodoItemNew {
 }
 
 #[table_name = "tasks"]
-#[derive(Deserialize, AsChangeset)]
+#[derive(juniper::GraphQLInputObject, Deserialize, AsChangeset)]
 pub struct TodoItemEdit {
     pub title: Option<String>,
     pub completed: Option<bool>,
 }
 
 #[table_name = "tasks"]
-#[derive(Deserialize, AsChangeset)]
+#[derive(juniper::GraphQLInputObject, Deserialize, AsChangeset)]
 pub struct TodoItemReplacement {
     pub title: String,
     pub completed: bool,
